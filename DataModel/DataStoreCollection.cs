@@ -1,4 +1,6 @@
-﻿namespace Z900.DataModel
+﻿using System;
+
+namespace Z900.DataModel
 {
    [System.Xml.Serialization.XmlRootAttribute( "DSColl" )]
    [DevExpress.Xpo.Persistent( "DATASTORE_COLL" )]
@@ -360,12 +362,88 @@
 
       public void Finish()
       {
-         if( ! this.isFinishing )
+         if( !this.isFinishing )
          {
             throw new System.InvalidOperationException( );
          }
          System.IO.File.Copy( this.TempFileFullPathName, this.SQLiteFileFullPathName, true );
          this.Save( this.XmlFileFullPathName );
+      }
+
+      public void SaveDataStoreCollection()
+      {
+         this.Finishing( );
+         {
+            string tfn = System.IO.Path.GetTempFileName( );
+            string cs = DevExpress.Xpo.DB.SQLiteConnectionProvider.GetConnectionString( tfn );
+            //
+            DevExpress.Xpo.IDataLayer dl = DevExpress.Xpo.XpoDefault.GetDataLayer( cs, DevExpress.Xpo.DB.AutoCreateOption.DatabaseAndSchema );
+            DevExpress.Xpo.XpoDefault.DataLayer = dl;
+            DevExpress.Xpo.Session session = DevExpress.Xpo.Session.DefaultSession;
+            session.Save( this );
+         }
+         this.Finish( );
+      }
+
+      public static DataStoreCollection LoadDataStoreCollection()
+      {
+         DataStoreCollection dsColl = DataStoreCollection.LoadLastWrittenSQLiteDataStoreCollection( );
+         if( dsColl == null )
+         {
+            dsColl = DataStoreCollection.LoadLastWrittenXmlDataStoreCollection( );
+            if( dsColl == null )
+            {
+               dsColl = DataStoreCollection.CreateBootstrapDataStoreCollection( );
+            }
+         }
+         return dsColl;
+      }
+
+      public static DataStoreCollection LoadLastWrittenSQLiteDataStoreCollection()
+      {
+         System.IO.FileInfo fi = Z900.Global.GetLastWrittenSQLiteFileInfo( );
+         if( fi == null )
+         {
+            return null;
+         }
+         string cs = DevExpress.Xpo.DB.SQLiteConnectionProvider.GetConnectionString( fi.FullName );
+         DevExpress.Xpo.IDataLayer dl = DevExpress.Xpo.XpoDefault.GetDataLayer( cs, DevExpress.Xpo.DB.AutoCreateOption.DatabaseAndSchema );
+         DevExpress.Xpo.XpoDefault.DataLayer = dl;
+         DevExpress.Xpo.Session session = DevExpress.Xpo.Session.DefaultSession;
+         DataStoreCollection o = session.GetObjectByKey<Z900.DataModel.DataStoreCollection>( 1 );
+         return o;
+      }
+
+      public static DataStoreCollection LoadLastWrittenXmlDataStoreCollection()
+      {
+         System.IO.FileInfo fi = Z900.Global.GetLastWrittenXmlFileInfo( );
+         if( fi == null )
+         {
+            return null;
+         }
+         DataStoreCollection o = DataStoreCollection.Load( fi.FullName );
+         return o;
+      }
+
+      public static DataStoreCollection CreateBootstrapDataStoreCollection()
+      {
+         string tmpFilename = System.IO.Path.GetTempFileName( );
+         string cs = DevExpress.Xpo.DB.SQLiteConnectionProvider.GetConnectionString( tmpFilename );
+         DevExpress.Xpo.IDataLayer dl = DevExpress.Xpo.XpoDefault.GetDataLayer( cs, DevExpress.Xpo.DB.AutoCreateOption.DatabaseAndSchema );
+         DevExpress.Xpo.XpoDefault.DataLayer = dl;
+         DevExpress.Xpo.Session session = DevExpress.Xpo.Session.DefaultSession;
+         //
+         DataStoreCollection dsColl = new DataStoreCollection( );
+         dsColl.TempFileFullPathName = tmpFilename;
+         session.Save( dsColl );
+         {
+            DataStore o = dsColl.NewDataStore( );
+            session.Save( o );
+         }
+         //dsColl.Finishing( );
+         //session.Save( dsColl );
+         //dsColl.Finish( );
+         return dsColl;
       }
    }
 }
