@@ -1,26 +1,10 @@
-﻿using System;
-
-namespace Z900.DataModel
+﻿namespace Z900.DataModel
 {
    [System.Xml.Serialization.XmlRootAttribute( "DSColl" )]
    [DevExpress.Xpo.Persistent( "DATASTORE_COLL" )]
-   public partial class DataStoreCollection
+   public partial class DataStoreCollection : DevExpress.Xpo.XPCustomObject
    {
-      #region --- TS_STR ---
-      public const string TS_MASK_FORMAT = "{0:yyyyMMdd-HHmmss-ffffzzz}";
-      [System.ComponentModel.DataAnnotations.Display( AutoGenerateField = false )]
-      [System.Xml.Serialization.XmlIgnore]
-      public static string TS_STR
-      {
-         [System.Diagnostics.DebuggerStepThrough]
-         get
-         {
-            return string.Format( TS_MASK_FORMAT, System.DateTime.Now );
-         }
-      }
-      #endregion
-
-      #region --- CREATION TIMESTAMP ----
+      #region --- START TIMESTAMP ----
       public const string START_TS_FIELDNAME = "StartTS";
       public const string START_TS_XMLFIELDNAME = "sts";
       public const string START_TS_DBFIELDNAME = "sts";
@@ -197,6 +181,25 @@ namespace Z900.DataModel
       }
       #endregion
 
+      #region --- ORIGINAL FILE PATH NAME ---
+      public const string ORIGFILEPATHNAME_FIELDNAME = "OrigFileFullPathName";
+      public const string ORIGFILEPATHNAME_XMLFIELDNAME = "offpn";
+      public const string ORIGFILEPATHNAME_DBFIELDNAME = "offpn";
+      public const string ORIGFILEPATHNAME_DISPLAYNAME = "OrigFile";
+      public const string ORIGFILEPATHNAME_DESCRIPTION = null;
+      [System.ComponentModel.DataAnnotations.Display( Name = ORIGFILEPATHNAME_DISPLAYNAME, Description = ORIGFILEPATHNAME_DESCRIPTION )]
+      [System.Xml.Serialization.XmlElement( ORIGFILEPATHNAME_XMLFIELDNAME )]
+      [DevExpress.Xpo.Persistent( ORIGFILEPATHNAME_DBFIELDNAME )]
+
+      public string OrigFileFullPathName
+      {
+         [System.Diagnostics.DebuggerStepThrough]
+         get { return GetPropertyValue<string>( ORIGFILEPATHNAME_FIELDNAME ); }
+         [System.Diagnostics.DebuggerStepThrough]
+         set { SetPropertyValue<string>( ORIGFILEPATHNAME_FIELDNAME, value ); }
+      }
+      #endregion
+
       #region --- TEMP FILE PATH NAME ---
       public const string TEMPFILEPATHNAME_FIELDNAME = "TempFileFullPathName";
       public const string TEMPFILEPATHNAME_XMLFIELDNAME = "tffpn";
@@ -270,7 +273,7 @@ namespace Z900.DataModel
       #endregion
 
       #region --- SAVE and LOAD --
-      public void Save( string filepathname )
+      private void Save( string filepathname )
       {
          //if( !System.IO.Directory.Exists( filepathname ) )
          //{
@@ -278,7 +281,7 @@ namespace Z900.DataModel
          //}
          this.XmlSerialize( filepathname );
       }
-      public static DataStoreCollection Load( string filepathname )
+      private static DataStoreCollection Load( string filepathname )
       {
          DataStoreCollection coll;
          if( System.IO.File.Exists( filepathname ) )
@@ -294,7 +297,7 @@ namespace Z900.DataModel
       #endregion
 
       #region --- XML Serialization ---
-      public void XmlSerialize( string path )
+      private void XmlSerialize( string path )
       {
          System.Xml.Serialization.XmlSerializer xs = new System.Xml.Serialization.XmlSerializer( typeof( DataStoreCollection ) );
          using( System.IO.TextWriter tw = new System.IO.StreamWriter( path ) )
@@ -302,7 +305,7 @@ namespace Z900.DataModel
             xs.Serialize( tw, this );
          }
       }
-      public static DataStoreCollection XmlDeserialize( string path )
+      private static DataStoreCollection XmlDeserialize( string path )
       {
          System.Xml.Serialization.XmlSerializer xs = new System.Xml.Serialization.XmlSerializer( typeof( DataStoreCollection ) );
          using( System.IO.TextReader tr = new System.IO.StreamReader( path ) )
@@ -313,7 +316,7 @@ namespace Z900.DataModel
       }
       #endregion
 
-      public DataStore NewTemplate()
+      private DataStore NewDataStoreTemplate()
       {
          DataStore o = new DataStore( )
          {
@@ -334,55 +337,35 @@ namespace Z900.DataModel
             //AqbQbFilename = "AQFN",
             //MiFqnFilename = "MIFQNFN"
          };
+         this.List.Add( o );
+         o.CID = this.ID;
+         //
          return o;
-      }
-
-      public DataStore NewDataStore()
-      {
-         DataStore o = NewTemplate( );
-         {
-            this.List.Add( o );
-            o.CID = this.ID;
-         }
-         return o;
-      }
-
-      private bool isFinishing = false;
-      public void Finishing()
-      {
-         string tsStr = Z900.Global.TS_STR;
-         string path = Z900.Global.DataStoreCollectionPathName;
-         string sqliteFn = System.IO.Path.Combine( path, tsStr + "." + Z900.Global.DataStoreCollectionSQLiteFileName );
-         string xmlFn = System.IO.Path.Combine( path, tsStr + "." + Z900.Global.DataStoreCollectionXmlFileName );
-         this.SQLiteFileFullPathName = sqliteFn;
-         this.XmlFileFullPathName = xmlFn;
-         this.FinishTS = System.DateTime.Now;
-         this.isFinishing = true;
-      }
-
-      public void Finish()
-      {
-         if( !this.isFinishing )
-         {
-            throw new System.InvalidOperationException( );
-         }
-         System.IO.File.Copy( this.TempFileFullPathName, this.SQLiteFileFullPathName, true );
-         this.Save( this.XmlFileFullPathName );
       }
 
       public void SaveDataStoreCollection()
       {
-         this.Finishing( );
+         string tsStr = Global.TS_STR;
+         string path = Global.DataStoreCollectionPathName;
+         string sqliteFn = System.IO.Path.Combine( path, tsStr + "." + Global.DataStoreCollectionSQLiteFileName );
+         string xmlFn = System.IO.Path.Combine( path, tsStr + "." + Global.DataStoreCollectionXmlFileName );
+         this.SQLiteFileFullPathName = sqliteFn;
+         this.XmlFileFullPathName = xmlFn;
+         this.FinishTS = System.DateTime.Now;
+         SaveDataStoreCollection( this );
+         // SQLite From TMP to "USER PATH"
+         System.IO.File.Copy( this.TempFileFullPathName, this.SQLiteFileFullPathName, true );
+         // Save XML at "USER PATH"
+         this.Save( this.XmlFileFullPathName );
+      }
+      private static void SaveDataStoreCollection( DataStoreCollection dsColl )
+      {
+         DevExpress.Xpo.Session session = DevExpress.Xpo.Session.DefaultSession;
+         session.Save( dsColl );
+         foreach( DataStore ds in dsColl.List )
          {
-            string tfn = System.IO.Path.GetTempFileName( );
-            string cs = DevExpress.Xpo.DB.SQLiteConnectionProvider.GetConnectionString( tfn );
-            //
-            DevExpress.Xpo.IDataLayer dl = DevExpress.Xpo.XpoDefault.GetDataLayer( cs, DevExpress.Xpo.DB.AutoCreateOption.DatabaseAndSchema );
-            DevExpress.Xpo.XpoDefault.DataLayer = dl;
-            DevExpress.Xpo.Session session = DevExpress.Xpo.Session.DefaultSession;
-            session.Save( this );
+            session.Save( ds );
          }
-         this.Finish( );
       }
 
       public static DataStoreCollection LoadDataStoreCollection()
@@ -399,51 +382,101 @@ namespace Z900.DataModel
          return dsColl;
       }
 
-      public static DataStoreCollection LoadLastWrittenSQLiteDataStoreCollection()
+      private static DataStoreCollection LoadLastWrittenSQLiteDataStoreCollection()
       {
-         System.IO.FileInfo fi = Z900.Global.GetLastWrittenSQLiteFileInfo( );
+         System.IO.FileInfo fi = Global.GetLastWrittenSQLiteFileInfo( );
          if( fi == null )
          {
             return null;
          }
-         string cs = DevExpress.Xpo.DB.SQLiteConnectionProvider.GetConnectionString( fi.FullName );
-         DevExpress.Xpo.IDataLayer dl = DevExpress.Xpo.XpoDefault.GetDataLayer( cs, DevExpress.Xpo.DB.AutoCreateOption.DatabaseAndSchema );
-         DevExpress.Xpo.XpoDefault.DataLayer = dl;
+         string tfn = CreateSession2TmpFs( );
+         System.IO.File.Copy( fi.FullName, tfn, true );
          DevExpress.Xpo.Session session = DevExpress.Xpo.Session.DefaultSession;
-         DataStoreCollection o = session.GetObjectByKey<Z900.DataModel.DataStoreCollection>( 1 );
-         return o;
-      }
+         DataStoreCollection dsColl = session.GetObjectByKey<DataStoreCollection>( 1 );
+         dsColl.TempFileFullPathName = tfn;
+         dsColl.OrigFileFullPathName = fi.FullName;
 
-      public static DataStoreCollection LoadLastWrittenXmlDataStoreCollection()
-      {
-         System.IO.FileInfo fi = Z900.Global.GetLastWrittenXmlFileInfo( );
-         if( fi == null )
+         DevExpress.Data.Filtering.CriteriaOperator op = new DevExpress.Data.Filtering.BinaryOperator( DataStore.CID_FIELDNAME, dsColl.ID );
+         DevExpress.Xpo.XPCollection<DataStore> coll = new DevExpress.Xpo.XPCollection<DataStore>( session, op );
+         foreach ( DataStore ds in coll )
          {
-            return null;
+            dsColl.List.Add( ds );
          }
-         DataStoreCollection o = DataStoreCollection.Load( fi.FullName );
-         return o;
-      }
-
-      public static DataStoreCollection CreateBootstrapDataStoreCollection()
-      {
-         string tmpFilename = System.IO.Path.GetTempFileName( );
-         string cs = DevExpress.Xpo.DB.SQLiteConnectionProvider.GetConnectionString( tmpFilename );
-         DevExpress.Xpo.IDataLayer dl = DevExpress.Xpo.XpoDefault.GetDataLayer( cs, DevExpress.Xpo.DB.AutoCreateOption.DatabaseAndSchema );
-         DevExpress.Xpo.XpoDefault.DataLayer = dl;
-         DevExpress.Xpo.Session session = DevExpress.Xpo.Session.DefaultSession;
-         //
-         DataStoreCollection dsColl = new DataStoreCollection( );
-         dsColl.TempFileFullPathName = tmpFilename;
-         session.Save( dsColl );
-         {
-            DataStore o = dsColl.NewDataStore( );
-            session.Save( o );
-         }
-         //dsColl.Finishing( );
-         //session.Save( dsColl );
-         //dsColl.Finish( );
          return dsColl;
+      }
+
+      private static DataStoreCollection LoadLastWrittenXmlDataStoreCollection()
+      {
+         System.IO.FileInfo fi = Global.GetLastWrittenXmlFileInfo( );
+         if( fi == null )
+         {
+            return null;
+         }
+         DataStoreCollection dsColl = DataStoreCollection.Load( fi.FullName );
+         {
+            dsColl.OrigFileFullPathName = fi.FullName;
+            dsColl.TempFileFullPathName = CreateSession2TmpFs( );
+            SaveDataStoreCollection( dsColl );
+         }
+         return dsColl;
+      }
+
+      private static DataStoreCollection CreateBootstrapDataStoreCollection()
+      {
+         string tfn = CreateSession2TmpFs( );
+         //
+         DataStoreCollection dsColl = new DataStoreCollection( )
+         {
+            OrigFileFullPathName = null,
+            TempFileFullPathName = tfn,
+            Name = "<Name-PlaceHolder>"
+         };
+         {
+            SaveDataStoreCollection( dsColl );
+            {
+               DataStore o = dsColl.NewDataStoreTemplate( );
+               o.CID = dsColl.ID;
+               o.Name = "ChiNook";
+               o.ConnectionString = @"Data Source=D:\TEMP\SQLite\chinook\chinook.db;";
+               o.IsActive = false;
+               o.IsToPullRemotely = false;
+               o.Preview = o.Description = null;
+            }
+            {
+               DataStore o = dsColl.NewDataStoreTemplate( );
+               o.CID = dsColl.ID;
+               o.Name = "MSSServer Test";
+               o.ConnectionString = @"Data Source=DBSRV\QWERTY;Database=Sales;User Id=user02;Password=8a0IucJ@Nx1Qy5HfFrX0Ob3m;";
+               o.IsActive = false;
+               o.IsToPullRemotely = false;
+               o.Preview = o.Description = null;
+            }
+            {
+               DataStore o = dsColl.NewDataStoreTemplate( );
+               o.CID = dsColl.ID;
+               o.Name = "SQLite DB1 Test";
+               o.ConnectionString = @"Data Source=D:\TEMP\SQLite\SQLITEDB1.db3;";
+               o.IsActive = false;
+               o.IsToPullRemotely = false;
+               o.Preview = o.Description = null;
+            }
+            {
+               DataStore o = dsColl.NewDataStoreTemplate( );
+               o.CID = dsColl.ID;
+            }
+            SaveDataStoreCollection( dsColl );
+         }
+         return dsColl;
+      }
+
+      private static string CreateSession2TmpFs()
+      {
+         // create "original file" @ "TMP FS"...
+         string tfn = System.IO.Path.GetTempFileName( );
+         string cs = DevExpress.Xpo.DB.SQLiteConnectionProvider.GetConnectionString( tfn );
+         DevExpress.Xpo.IDataLayer dl = DevExpress.Xpo.XpoDefault.GetDataLayer( cs, DevExpress.Xpo.DB.AutoCreateOption.DatabaseAndSchema );
+         DevExpress.Xpo.XpoDefault.DataLayer = dl;
+         return tfn;
       }
    }
 }

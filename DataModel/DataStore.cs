@@ -1,7 +1,7 @@
 ﻿namespace Z900.DataModel
 {
    [DevExpress.Xpo.Persistent( "DATASTORE" )]
-   public partial class DataStore
+   public partial class DataStore : DevExpress.Xpo.XPCustomObject
    {
       #region --- TS_STR ---
       public const string TS_MASK_FORMAT = "{0:yyyyMMdd-HHmmss-ffffzzz}";
