@@ -56,10 +56,14 @@ namespace Z900.DataPuller
          switch( (DataModel.DataStore.SyntaxProviderEnum) ds.SyntaxProvider )
          {
             case DataModel.DataStore.SyntaxProviderEnum.SQLITE:
-               return qb = HandleSQLite( ds );
+               qb = CreateAqbQbSQLite( ds );
+               break;
             case DataModel.DataStore.SyntaxProviderEnum.MS_SQL_SERVER_2014:
-               return qb = null; // HandleMSSQL( ds );
+               return qb = null; // CreateAqbQbMSSS( ds );
+               //break;
             case DataModel.DataStore.SyntaxProviderEnum.AUTO:
+               return qb = null; // CreateAqbQbAuto( ds );
+               //break;
             case DataModel.DataStore.SyntaxProviderEnum.GENERIC:
             case DataModel.DataStore.SyntaxProviderEnum.ANSI_SQL_2003:
             case DataModel.DataStore.SyntaxProviderEnum.ANSI_SQL_89:
@@ -99,10 +103,6 @@ namespace Z900.DataPuller
             default:
                return null;
          }
-      }
-      private static ActiveQueryBuilder.View.WinForms.QueryBuilder HandleSQLite( DataModel.DataStore ds )
-      {
-         ActiveQueryBuilder.View.WinForms.QueryBuilder qb = CreateAqbQbSQLite( ds );
          ActiveQueryBuilder.Core.MetadataLoadingOptions loadingOptions = qb.SQLContext.MetadataContainer.LoadingOptions;
          loadingOptions.LoadDefaultDatabaseOnly = ds.LoadDefaultDatabaseOnly;
          loadingOptions.LoadSystemObjects = ds.LoadSystemObjects;
@@ -111,13 +111,30 @@ namespace Z900.DataPuller
          {
             ds.PullTS = System.DateTime.Now;
             string x = string.Format( Global.TS_MASK_FORMAT, ds.PullTS ).Replace( ":", "" );
-            ds.TempFileFullPathName = System.IO.Path.GetTempFileName( ) ;
+            ds.TempFileFullPathName = System.IO.Path.GetTempFileName( );
             ds.AqbQbFilename = Global.DataStoreCollectionPathName + x + "." + ds.Name + Global.FileExtensionXmlAqbQb;
          }
-         qb.MetadataContainer.LoadAll(ds.WithFields);
+         qb.MetadataContainer.LoadAll( ds.WithFields );
          //qb.InitializeDatabaseSchemaTree( );
          return qb;
+
       }
+
+      #region --- Auto Handle and AQB-QB ---
+      public static ActiveQueryBuilder.View.WinForms.QueryBuilder CreateAqbQbAuto( DataModel.DataStore ds )
+      {
+         ActiveQueryBuilder.View.WinForms.QueryBuilder qb = new ActiveQueryBuilder.View.WinForms.QueryBuilder( )
+         {
+            SyntaxProvider = new ActiveQueryBuilder.Core.AutoSyntaxProvider( ),
+            MetadataProvider = new ActiveQueryBuilder.Core.UniversalMetadataProvider( )
+         };
+         //qb.MetadataProvider.Connection = new System.Data.SqlClient.SqlConnection( ds.ConnectionString );
+         qb.MetadataProvider.Connection = new System.Data.SQLite.SQLiteConnection( ds.ConnectionString );
+         return qb;
+      }
+      #endregion
+
+      #region --- SQLite Handle and AQB-QB ---
       public static ActiveQueryBuilder.View.WinForms.QueryBuilder CreateAqbQbSQLite( DataModel.DataStore ds )
       {
          ActiveQueryBuilder.View.WinForms.QueryBuilder qb = new ActiveQueryBuilder.View.WinForms.QueryBuilder( )
@@ -129,13 +146,28 @@ namespace Z900.DataPuller
          qb.MetadataProvider.Connection = new System.Data.SQLite.SQLiteConnection( ds.ConnectionString );
          return qb;
       }
+      #endregion
+
+      #region --- MSSS Handle and AQB-QB ---
+      public static ActiveQueryBuilder.View.WinForms.QueryBuilder CreateAqbQbMSSS( DataModel.DataStore ds )
+      {
+         ActiveQueryBuilder.View.WinForms.QueryBuilder qb = new ActiveQueryBuilder.View.WinForms.QueryBuilder( )
+         {
+            SyntaxProvider = new ActiveQueryBuilder.Core.MSSQLSyntaxProvider( ),
+            MetadataProvider = new ActiveQueryBuilder.Core.MSSQLMetadataProvider( )
+         };
+         qb.MetadataProvider.Connection = new System.Data.SqlClient.SqlConnection( ds.ConnectionString );
+         //qb.MetadataProvider.Connection = new System.Data.SQLite.SQLiteConnection( ds.ConnectionString );
+         return qb;
+      }
+      #endregion
 
       private static void DumpAqbQb( ActiveQueryBuilder.View.WinForms.QueryBuilder qb, DataModel.DataStore ds )
       {
          string path = Global.DataStoreCollectionPathName + Global.TS_STR;
          {
             // Export AQB’s Query Builder XML Structures…
-            //string xmlStr = qb.MetadataContainer.XML;
+            string xmlStr = qb.MetadataContainer.XML;
             qb.MetadataContainer.ExportToXML( ds.TempFileFullPathName );
             // SQLite From TMP to "USER PATH"
             System.IO.File.Copy( ds.TempFileFullPathName, ds.AqbQbFilename, true );

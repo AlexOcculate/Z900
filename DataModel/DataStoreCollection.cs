@@ -455,10 +455,10 @@
                o.CID = dsColl.ID;
                o.Name = "MSSServer Test";
                o.ConnectionString = @"Data Source=DBSRV\QWERTY;Database=Sales;User Id=user02;Password=8a0IucJ@Nx1Qy5HfFrX0Ob3m;";
-               o.IsActive = false;
+               o.IsActive = true;
                o.IsToPullRemotely = false;
                o.Preview = o.Description = null;
-               o.SyntaxProvider = (int) DataStore.SyntaxProviderEnum.MS_SQL_SERVER_2014;
+               o.SyntaxProvider = (int) DataStore.SyntaxProviderEnum.AUTO; //.MS_SQL_SERVER_2014;
                o.WithFields = true;
             }
             {
