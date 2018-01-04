@@ -24,8 +24,8 @@ namespace Z900.DataPuller
          {
             for( int i = 0; i < dsColl.List.Count; i++ )
             {
-               Z900.DataModel.DataStore ds = dsColl.List[ i ];
-               if( !ds.IsActive || !ds.IsToPullRemotely )
+               DataModel.DataStore ds = dsColl.List[ i ];
+               if( !ds.IsActive /*|| !ds.IsToPullRemotely*/ )
                {
                   continue;
                }
@@ -34,7 +34,7 @@ namespace Z900.DataPuller
                {
                   continue;
                }
-               //DumpAqbQb( qb, ds );
+               DumpAqbQb( qb, ds );
                //DumpMetadataItem( qb, ds );
 
                // publish( qb, ds );
@@ -49,6 +49,7 @@ namespace Z900.DataPuller
          }
          dsColl.SaveDataStoreCollection( );
       }
+
       private static ActiveQueryBuilder.View.WinForms.QueryBuilder PullMetadata( DataModel.DataStore ds )
       {
          ActiveQueryBuilder.View.WinForms.QueryBuilder qb;
@@ -57,7 +58,7 @@ namespace Z900.DataPuller
             case DataModel.DataStore.SyntaxProviderEnum.SQLITE:
                return qb = HandleSQLite( ds );
             case DataModel.DataStore.SyntaxProviderEnum.MS_SQL_SERVER_2014:
-               return qb = null; //  HandleMSSQL( ds );
+               return qb = null; // HandleMSSQL( ds );
             case DataModel.DataStore.SyntaxProviderEnum.AUTO:
             case DataModel.DataStore.SyntaxProviderEnum.GENERIC:
             case DataModel.DataStore.SyntaxProviderEnum.ANSI_SQL_2003:
@@ -107,8 +108,14 @@ namespace Z900.DataPuller
          loadingOptions.LoadSystemObjects = ds.LoadSystemObjects;
          //loadingOptions.IncludeFilter.Types = MetadataType.Field;
          //loadingOptions.ExcludeFilter.Schemas.Add(“dbo”);
-         //qb.InitializeDatabaseSchemaTree();
-         //qb.MetadataContainer.LoadAll(withFields);
+         {
+            ds.PullTS = System.DateTime.Now;
+            string x = string.Format( Global.TS_MASK_FORMAT, ds.PullTS ).Replace( ":", "" );
+            ds.TempFileFullPathName = System.IO.Path.GetTempFileName( ) ;
+            ds.AqbQbFilename = Global.DataStoreCollectionPathName + x + "." + ds.Name + Global.FileExtensionXmlAqbQb;
+         }
+         qb.MetadataContainer.LoadAll(ds.WithFields);
+         //qb.InitializeDatabaseSchemaTree( );
          return qb;
       }
       public static ActiveQueryBuilder.View.WinForms.QueryBuilder CreateAqbQbSQLite( DataModel.DataStore ds )
@@ -118,8 +125,23 @@ namespace Z900.DataPuller
             SyntaxProvider = new ActiveQueryBuilder.Core.SQLiteSyntaxProvider( ),
             MetadataProvider = new ActiveQueryBuilder.Core.SQLiteMetadataProvider( )
          };
-         qb.MetadataProvider.Connection = new System.Data.SqlClient.SqlConnection( ds.ConnectionString );
+         //qb.MetadataProvider.Connection = new System.Data.SqlClient.SqlConnection( ds.ConnectionString );
+         qb.MetadataProvider.Connection = new System.Data.SQLite.SQLiteConnection( ds.ConnectionString );
          return qb;
+      }
+
+      private static void DumpAqbQb( ActiveQueryBuilder.View.WinForms.QueryBuilder qb, DataModel.DataStore ds )
+      {
+         string path = Global.DataStoreCollectionPathName + Global.TS_STR;
+         {
+            // Export AQB’s Query Builder XML Structures…
+            //string xmlStr = qb.MetadataContainer.XML;
+            qb.MetadataContainer.ExportToXML( ds.TempFileFullPathName );
+            // SQLite From TMP to "USER PATH"
+            System.IO.File.Copy( ds.TempFileFullPathName, ds.AqbQbFilename, true );
+            // qb.MetadataContainer.ImportFromXML( filename );
+         }
+         //tnm.ShowNotification( tnm.Notifications[ 0 ] );
       }
    }
 }

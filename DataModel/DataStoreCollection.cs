@@ -432,6 +432,7 @@
          //
          DataStoreCollection dsColl = new DataStoreCollection( )
          {
+            IsActive = true,
             OrigFileFullPathName = null,
             TempFileFullPathName = tfn,
             Name = "<Name-PlaceHolder>"
@@ -443,9 +444,11 @@
                o.CID = dsColl.ID;
                o.Name = "ChiNook";
                o.ConnectionString = @"Data Source=D:\TEMP\SQLite\chinook\chinook.db;";
-               o.IsActive = false;
+               o.IsActive = true;
                o.IsToPullRemotely = false;
                o.Preview = o.Description = null;
+               o.SyntaxProvider = (int) DataStore.SyntaxProviderEnum.SQLITE;
+               o.WithFields = true;
             }
             {
                DataStore o = dsColl.NewDataStoreTemplate( );
@@ -455,15 +458,19 @@
                o.IsActive = false;
                o.IsToPullRemotely = false;
                o.Preview = o.Description = null;
+               o.SyntaxProvider = (int) DataStore.SyntaxProviderEnum.MS_SQL_SERVER_2014;
+               o.WithFields = true;
             }
             {
                DataStore o = dsColl.NewDataStoreTemplate( );
                o.CID = dsColl.ID;
                o.Name = "SQLite DB1 Test";
                o.ConnectionString = @"Data Source=D:\TEMP\SQLite\SQLITEDB1.db3;";
-               o.IsActive = false;
+               o.IsActive = true;
                o.IsToPullRemotely = false;
                o.Preview = o.Description = null;
+               o.SyntaxProvider = (int) DataStore.SyntaxProviderEnum.SQLITE;
+               o.WithFields = true;
             }
             {
                DataStore o = dsColl.NewDataStoreTemplate( );

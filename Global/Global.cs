@@ -3,7 +3,7 @@
    public static class Global
    {
       #region --- TS_STR ---
-      public const string TS_MASK_FORMAT = "{0:yyyyMMdd-HHmmss-ffffzzz}";
+      public const string TS_MASK_FORMAT = "{0:yyyyMMdd-HHmmss-fffffffzzz}";
       public static string TS_STR
       {
          [System.Diagnostics.DebuggerStepThrough]
@@ -14,16 +14,10 @@
       }
       #endregion
 
-      #region --- CREATION TIMESTAMP ----
-      public static System.DateTime CreationTS
-      {
-         [System.Diagnostics.DebuggerStepThrough]
-         get;
-      }
-      #endregion
-
       public static string FileExtensionSQLite = @".db";
       public static string FileExtensionXml = @".xml";
+      public static string FileExtensionXmlAqbQb = @".AqbQb" + Global.FileExtensionXml;
+      public static string FileExtensionXmlMiFqn = @".MiFqn" + Global.FileExtensionXml;
       //
       public static string DataStoreCollectionPathName = @"D:\TEMP\SQLite\";
       public static string DataStoreCollectionBaseName = @"DataStoreCollection";

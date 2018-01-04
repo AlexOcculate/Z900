@@ -3,20 +3,6 @@
    [DevExpress.Xpo.Persistent( "DATASTORE" )]
    public partial class DataStore : DevExpress.Xpo.XPCustomObject
    {
-      #region --- TS_STR ---
-      public const string TS_MASK_FORMAT = "{0:yyyyMMdd-HHmmss-ffffzzz}";
-      [System.ComponentModel.DataAnnotations.Display( AutoGenerateField = false )]
-      [System.Xml.Serialization.XmlIgnore]
-      public static string TS_STR
-      {
-         [System.Diagnostics.DebuggerStepThrough]
-         get
-         {
-            return string.Format( TS_MASK_FORMAT, System.DateTime.Now );
-         }
-      }
-      #endregion
-
       #region --- Enums... ---
       public enum MetadataProviderEnum
       {
@@ -31,36 +17,43 @@
          ANSI_SQL_2003,
          ANSI_SQL_89,
          ANSI_SQL_92,
+         // 05
          FIREBIRD_1_0,
          FIREBIRD_1_5,
          FIREBIRD_2_0,
          FIREBIRD_2_5,
          IBM_DB2,
+         // 10
          IBM_INFORMIX_10,
          IBM_INFORMIX_8,
          IBM_INFORMIX_9,
          MS_ACCESS_2000,
          MS_ACCESS_2003,
+         // 15
          MS_ACCESS_97,
          MS_ACCESS_XP,
          MS_SQL_SERVER_2000,
          MS_SQL_SERVER_2005,
          MS_SQL_SERVER_2008,
+         // 20
          MS_SQL_SERVER_2012,
          MS_SQL_SERVER_2014,
          MS_SQL_SERVER_7,
          MS_SQL_SERVER_COMPACT_EDITION,
          MYSQL_3_XX,
+         // 25
          MYSQL_4_0,
          MYSQL_4_1,
          MYSQL_5_0,
          ORACLE_10,
          ORACLE_11,
+         // 30
          ORACLE_7,
          ORACLE_8,
          ORACLE_9,
          POSTGRESQL,
          SQLITE,
+         // 35
          SYBASE_ASE,
          SYBASE_SQL_ANYWHERE,
          TERADATA,
@@ -81,6 +74,27 @@
       [DevExpress.Xpo.Persistent( CREATION_TS_DBFIELDNAME )]
 
       public System.DateTime CreationTS
+      {
+         [System.Diagnostics.DebuggerStepThrough]
+         get;
+         [System.Diagnostics.DebuggerStepThrough]
+         set;
+      }
+      #endregion
+
+      #region --- PULL TIMESTAMP ----
+      public const string PULL_TS_FIELDNAME = "PullTS";
+      public const string PULL_TS_XMLFIELDNAME = "pts";
+      public const string PULL_TS_DBFIELDNAME = "pts";
+      public const string PULL_TS_DISPLAYNAME = "Pull TS";
+      public const string PULL_TS_DESCRIPTION = null;
+      //[System.ComponentModel.DataAnnotations.Display( Name = PULL_TS_DISPLAYNAME, Description = PULL_TS_DESCRIPTION )]
+      //[System.ComponentModel.DataAnnotations.DataType( System.ComponentModel.DataAnnotations.DataType.DateTime )]
+      //[System.ComponentModel.ReadOnly( true )]
+      [System.Xml.Serialization.XmlAttribute( PULL_TS_XMLFIELDNAME )]
+      [DevExpress.Xpo.Persistent( PULL_TS_DBFIELDNAME )]
+
+      public System.DateTime PullTS
       {
          [System.Diagnostics.DebuggerStepThrough]
          get;
@@ -149,6 +163,25 @@
       }
       #endregion
 
+      #region --- IS ACTIVE ? ---
+      public const string IS_ACTIVE_FIELDNAME = "IsActive";
+      public const string IS_ACTIVE_XMLFIELDNAME = "actv";
+      public const string IS_ACTIVE_DBFIELDNAME = "actv";
+      public const string IS_ACTIVE_DISPLAYNAME = "Is Active?";
+      public const string IS_ACTIVE_DESCRIPTION = null;
+      [System.ComponentModel.DataAnnotations.Display( Name = IS_ACTIVE_DISPLAYNAME, Description = IS_ACTIVE_DESCRIPTION )]
+      [System.Xml.Serialization.XmlAttribute( IS_ACTIVE_XMLFIELDNAME )]
+      [DevExpress.Xpo.Persistent( IS_ACTIVE_DBFIELDNAME )]
+
+      public bool IsActive
+      {
+         [System.Diagnostics.DebuggerStepThrough]
+         get;
+         [System.Diagnostics.DebuggerStepThrough]
+         set;
+      }
+      #endregion
+
       #region --- NAME ---
       public const string NAME_FIELDNAME = "Name";
       public const string NAME_XMLFIELDNAME = "name";
@@ -198,25 +231,6 @@
       [DevExpress.Xpo.Persistent( PREVIEW_DBFIELDNAME )]
 
       public string Preview
-      {
-         [System.Diagnostics.DebuggerStepThrough]
-         get;
-         [System.Diagnostics.DebuggerStepThrough]
-         set;
-      }
-      #endregion
-
-      #region --- IS ACTIVE ? ---
-      public const string IS_ACTIVE_FIELDNAME = "IsActive";
-      public const string IS_ACTIVE_XMLFIELDNAME = "actv";
-      public const string IS_ACTIVE_DBFIELDNAME = "actv";
-      public const string IS_ACTIVE_DISPLAYNAME = "Is Active?";
-      public const string IS_ACTIVE_DESCRIPTION = null;
-      [System.ComponentModel.DataAnnotations.Display( Name = IS_ACTIVE_DISPLAYNAME, Description = IS_ACTIVE_DESCRIPTION )]
-      [System.Xml.Serialization.XmlAttribute( IS_ACTIVE_XMLFIELDNAME )]
-      [DevExpress.Xpo.Persistent( IS_ACTIVE_DBFIELDNAME )]
-
-      public bool IsActive
       {
          [System.Diagnostics.DebuggerStepThrough]
          get;
@@ -397,39 +411,60 @@
       }
       #endregion
 
+      #region --- TEMP FILE PATH NAME ---
+      public const string TEMPFILEPATHNAME_FIELDNAME = "TempFileFullPathName";
+      public const string TEMPFILEPATHNAME_XMLFIELDNAME = "tffpn";
+      public const string TEMPFILEPATHNAME_DBFIELDNAME = "tffpn";
+      public const string TEMPFILEPATHNAME_DISPLAYNAME = "TempFile";
+      public const string TEMPFILEPATHNAME_DESCRIPTION = null;
+      [System.ComponentModel.DataAnnotations.Display( Name = TEMPFILEPATHNAME_DISPLAYNAME, Description = TEMPFILEPATHNAME_DESCRIPTION )]
+      [System.Xml.Serialization.XmlElement( TEMPFILEPATHNAME_XMLFIELDNAME )]
+      [DevExpress.Xpo.Persistent( TEMPFILEPATHNAME_DBFIELDNAME )]
+
+      public string TempFileFullPathName
+      {
+         [System.Diagnostics.DebuggerStepThrough]
+         get;
+         [System.Diagnostics.DebuggerStepThrough]
+         set;
+      }
+      #endregion
+
       #region --- AQB QB XML FILENAME ---
       public const string AQB_QB_XML_FILENAME_FIELDNAME = "AqbQbFilename";
+      public const string AQB_QB_XML_FILENAME_XMLFIELDNAME = "affpn";
       public const string AQB_QB_XML_FILENAME_DISPLAYNAME = "AqbQb Filename";
       public const string AQB_QB_XML_FILENAME_DESCRIPTION = null;
       [System.ComponentModel.DataAnnotations.Display( Name = AQB_QB_XML_FILENAME_DISPLAYNAME, Description = AQB_QB_XML_FILENAME_DESCRIPTION )]
       [System.ComponentModel.ReadOnly( true )]
-      [System.Xml.Serialization.XmlIgnore]
-      [DevExpress.Xpo.NonPersistent]
+      [System.Xml.Serialization.XmlElement( AQB_QB_XML_FILENAME_XMLFIELDNAME )]
+      [DevExpress.Xpo.Persistent]
 
       public string AqbQbFilename
       {
          [System.Diagnostics.DebuggerStepThrough]
-         get { return string.Format( "{0}.AqbQb.ds", this.Name ); }
-         //[System.Diagnostics.DebuggerStepThrough]
-         //set;
+         get;
+         [System.Diagnostics.DebuggerStepThrough]
+         set;
       }
       #endregion
 
       #region --- MI FQN XML FILENAME ---
       public const string MI_FQN_XML_FILENAME_FIELDNAME = "MiFqnFilename";
+      public const string MI_FQN_XML_FILENAME_XMLFIELDNAME = "mffpn";
       public const string MI_FQN_XML_FILENAME_DISPLAYNAME = "MiFqn Filename";
       public const string MI_FQN_XML_FILENAME_DESCRIPTION = null;
       [System.ComponentModel.DataAnnotations.Display( Name = MI_FQN_XML_FILENAME_DISPLAYNAME, Description = MI_FQN_XML_FILENAME_DESCRIPTION )]
       [System.ComponentModel.ReadOnly( true )]
-      [System.Xml.Serialization.XmlIgnore]
-      [DevExpress.Xpo.NonPersistent]
+      [System.Xml.Serialization.XmlElement( MI_FQN_XML_FILENAME_XMLFIELDNAME )]
+      [DevExpress.Xpo.Persistent]
 
       public string MiFqnFilename
       {
          [System.Diagnostics.DebuggerStepThrough]
-         get { return string.Format( "{0}.MiFqn.ds", this.Name ); }
-         //[System.Diagnostics.DebuggerStepThrough]
-         //set;
+         get;
+         [System.Diagnostics.DebuggerStepThrough]
+         set;
       }
       #endregion
 
@@ -439,5 +474,16 @@
          this.CreationTS = System.DateTime.Now;
       }
       #endregion
+
+      public override string ToString()
+      {
+         string s = string.Format(
+            "ID: {0}, IsActive: {1}, IsToPullRemotely: {2}, SyntaxProvider: {3}",
+            this.ID, this.IsActive,
+            this.IsToPullRemotely,
+            ((SyntaxProviderEnum) this.SyntaxProvider).ToString( )
+         );
+         return s;
+      }
    }
 }
