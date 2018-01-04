@@ -270,10 +270,11 @@
          this.StartTS = System.DateTime.Now;
          this.List = new System.ComponentModel.BindingList<DataStore>( );
       }
+
       #endregion
 
       #region --- SAVE and LOAD --
-      private void Save( string filepathname )
+      private void SaveXML( string filepathname )
       {
          //if( !System.IO.Directory.Exists( filepathname ) )
          //{
@@ -281,7 +282,7 @@
          //}
          this.XmlSerialize( filepathname );
       }
-      private static DataStoreCollection Load( string filepathname )
+      private static DataStoreCollection LoadXML( string filepathname )
       {
          DataStoreCollection coll;
          if( System.IO.File.Exists( filepathname ) )
@@ -356,11 +357,12 @@
          // SQLite From TMP to "USER PATH"
          System.IO.File.Copy( this.TempFileFullPathName, this.SQLiteFileFullPathName, true );
          // Save XML at "USER PATH"
-         this.Save( this.XmlFileFullPathName );
+         this.SaveXML( this.XmlFileFullPathName );
       }
       private static void SaveDataStoreCollection( DataStoreCollection dsColl )
       {
-         DevExpress.Xpo.Session session = DevExpress.Xpo.Session.DefaultSession;
+         // The session creation must be before the object creation!!!
+         DevExpress.Xpo.Session session = DevExpress.Xpo.XpoDefault.Session; // DevExpress.Xpo.Session.DefaultSession;
          session.Save( dsColl );
          foreach( DataStore ds in dsColl.List )
          {
@@ -389,16 +391,17 @@
          {
             return null;
          }
-         string tfn = CreateSession2TmpFs( );
-         System.IO.File.Copy( fi.FullName, tfn, true );
+         // The session creation must be before the object creation!!!
+         string tffpn = CreateSession2TmpFs( );
+         System.IO.File.Copy( fi.FullName, tffpn, true );
          DevExpress.Xpo.Session session = DevExpress.Xpo.Session.DefaultSession;
          DataStoreCollection dsColl = session.GetObjectByKey<DataStoreCollection>( 1 );
-         dsColl.TempFileFullPathName = tfn;
+         dsColl.TempFileFullPathName = tffpn;
          dsColl.OrigFileFullPathName = fi.FullName;
-
+         session.Save( dsColl );
          DevExpress.Data.Filtering.CriteriaOperator op = new DevExpress.Data.Filtering.BinaryOperator( DataStore.CID_FIELDNAME, dsColl.ID );
          DevExpress.Xpo.XPCollection<DataStore> coll = new DevExpress.Xpo.XPCollection<DataStore>( session, op );
-         foreach ( DataStore ds in coll )
+         foreach( DataStore ds in coll )
          {
             dsColl.List.Add( ds );
          }
@@ -412,12 +415,14 @@
          {
             return null;
          }
-         DataStoreCollection dsColl = DataStoreCollection.Load( fi.FullName );
-         {
-            dsColl.OrigFileFullPathName = fi.FullName;
-            dsColl.TempFileFullPathName = CreateSession2TmpFs( );
-            SaveDataStoreCollection( dsColl );
-         }
+         // The session creation must be before the object creation!!!
+         string tffpn = CreateSession2TmpFs( );
+         DataStoreCollection dsColl = DataStoreCollection.LoadXML( fi.FullName );
+         dsColl.ID = 0;
+         dsColl.OrigFileFullPathName = fi.FullName;
+         dsColl.TempFileFullPathName = tffpn;
+         SaveDataStoreCollection( dsColl );
+         //
          return dsColl;
       }
 
@@ -471,11 +476,13 @@
 
       private static string CreateSession2TmpFs()
       {
+         // The session creation must be before the object creation!!!
          // create "original file" @ "TMP FS"...
          string tfn = System.IO.Path.GetTempFileName( );
          string cs = DevExpress.Xpo.DB.SQLiteConnectionProvider.GetConnectionString( tfn );
          DevExpress.Xpo.IDataLayer dl = DevExpress.Xpo.XpoDefault.GetDataLayer( cs, DevExpress.Xpo.DB.AutoCreateOption.DatabaseAndSchema );
          DevExpress.Xpo.XpoDefault.DataLayer = dl;
+         //
          return tfn;
       }
    }

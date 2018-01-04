@@ -16,4 +16,13 @@
     <ProjectReference Include="..\Global\Global.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="ActiveQueryBuilder.Core">
+      <HintPath>..\..\..\..\..\..\Program Files\ActiveDBSoft\Active Query Builder 3 WinForms Professional Edition\assemblies\ActiveQueryBuilder.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="ActiveQueryBuilder.View.WinForms">
+      <HintPath>..\..\..\..\..\..\Program Files\ActiveDBSoft\Active Query Builder 3 WinForms Professional Edition\assemblies\ActiveQueryBuilder.View.WinForms.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
