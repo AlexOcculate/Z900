@@ -458,7 +458,7 @@
                o.IsActive = true;
                o.IsToPullRemotely = false;
                o.Preview = o.Description = null;
-               o.SyntaxProvider = (int) DataStore.SyntaxProviderEnum.AUTO; //.MS_SQL_SERVER_2014;
+               o.SyntaxProvider = (int) DataStore.SyntaxProviderEnum.MS_SQL_SERVER_2014;
                o.WithFields = true;
             }
             {

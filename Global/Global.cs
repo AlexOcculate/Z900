@@ -1,7 +1,11 @@
 ﻿namespace Z900
 {
+   [System.Xml.Serialization.XmlRootAttribute( "Global" )]
    public static class Global
    {
+      private static System.Configuration.Configuration cm = System.Configuration.ConfigurationManager.OpenExeConfiguration( System.Configuration.ConfigurationUserLevel.None );
+      private static System.Configuration.KeyValueConfigurationCollection confColl = cm.AppSettings.Settings;
+      //
       #region --- TS_STR ---
       public const string TS_MASK_FORMAT = "{0:yyyyMMdd-HHmmss-fffffffzzz}";
       public static string TS_STR
@@ -19,7 +23,43 @@
       public static string FileExtensionXmlAqbQb = @".AqbQb" + Global.FileExtensionXml;
       public static string FileExtensionXmlMiFqn = @".MiFqn" + Global.FileExtensionXml;
       //
-      public static string DataStoreCollectionPathName = @"D:\TEMP\SQLite\";
+      private const string TEMP_PATH_DIR_CONFIG_KEY_NAME = "TEMP_PATHDIR"; 
+      public static string TempPathName
+      {
+         [System.Diagnostics.DebuggerStepThrough]
+         get
+         {
+            try
+            {
+               return confColl[ TEMP_PATH_DIR_CONFIG_KEY_NAME ].Value;
+            }
+            catch( System.Exception ex )
+            {
+               confColl.Add( TEMP_PATH_DIR_CONFIG_KEY_NAME, System.IO.Path.GetTempPath( ) );
+               cm.Save( System.Configuration.ConfigurationSaveMode.Minimal );
+               return confColl[ TEMP_PATH_DIR_CONFIG_KEY_NAME ].Value;
+            }
+         }
+      }
+      private const string DATASTORECOLL_PATH_DIR_CONFIG_KEY_NAME = "DSCOLL_PATHDIR";
+      public static string DataStoreCollectionPathName
+      {
+         [System.Diagnostics.DebuggerStepThrough]
+         get
+         {
+            try
+            {
+               return confColl[ DATASTORECOLL_PATH_DIR_CONFIG_KEY_NAME ].Value;
+            }
+            catch( System.Exception ex )
+            {
+               confColl.Add( DATASTORECOLL_PATH_DIR_CONFIG_KEY_NAME,  System.IO.Path.GetTempPath( ) );
+               cm.Save( System.Configuration.ConfigurationSaveMode.Minimal );
+               return confColl[ DATASTORECOLL_PATH_DIR_CONFIG_KEY_NAME ].Value;
+            }
+         }
+      }
+      //
       public static string DataStoreCollectionBaseName = @"DataStoreCollection";
       public static string DataStoreCollectionSQLiteFileName = DataStoreCollectionBaseName + FileExtensionSQLite;
       public static string DataStoreCollectionXmlFileName = DataStoreCollectionBaseName + FileExtensionXml;
