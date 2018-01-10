@@ -1,6 +1,4 @@
-﻿using System.ServiceProcess;
-
-namespace Z900.DataPullerManager
+﻿namespace Z900.DataPullerManager
 {
    partial class DataPullerManagerForm
    {
@@ -96,7 +94,7 @@ namespace Z900.DataPullerManager
          this.eventLogTextBox.Multiline = true;
          this.eventLogTextBox.Name = "eventLogTextBox";
          this.eventLogTextBox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-         this.eventLogTextBox.Size = new System.Drawing.Size(237, 148);
+         this.eventLogTextBox.Size = new System.Drawing.Size(543, 186);
          this.eventLogTextBox.TabIndex = 4;
          // 
          // eventLog
@@ -111,7 +109,7 @@ namespace Z900.DataPullerManager
          // 
          this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
          this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-         this.ClientSize = new System.Drawing.Size(259, 223);
+         this.ClientSize = new System.Drawing.Size(565, 261);
          this.Controls.Add(this.eventLogTextBox);
          this.Controls.Add(this.logItButton);
          this.Controls.Add(this.stopButton);

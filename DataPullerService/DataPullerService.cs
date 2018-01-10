@@ -13,17 +13,17 @@
       public const string SERVICE_NAME_PREFIX = "DataPuller";
       public const string SERVICE_LOGGER_NAME = SERVICE_NAME_PREFIX + "Logger";
       public const string SERVICE_LOGGER_SOURCE_NAME = SERVICE_LOGGER_NAME + "Service";
+      public const int SERVICE_TIMER_INTERVAL = 20000;
 
       private System.Timers.Timer _timer = null;
 
       public DataPullerService()
       {
          InitializeComponent( );
-
          // Set the timer to fire every sixty seconds
          // (remember the timer is in millisecond resolution,
          //  so 1000 = 1 second. )
-         this._timer = new System.Timers.Timer( 20000 );
+         this._timer = new System.Timers.Timer( SERVICE_TIMER_INTERVAL );
          // Now tell the timer when the timer fires
          // (the Elapsed event) call the _timer_Elapsed
          // method in our code
@@ -31,7 +31,6 @@
       }
 
       private void WriteToLog( string msg )
-
       {
          System.Diagnostics.EventLog evt = new System.Diagnostics.EventLog( SERVICE_LOGGER_NAME );
          string message = msg
