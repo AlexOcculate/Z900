@@ -485,10 +485,17 @@
       {
          // The session creation must be before the object creation!!!
          // create "original file" @ "TMP FS"...
-         string tfn = System.IO.Path.GetTempFileName( );
-         string cs = DevExpress.Xpo.DB.SQLiteConnectionProvider.GetConnectionString( tfn );
-         DevExpress.Xpo.IDataLayer dl = DevExpress.Xpo.XpoDefault.GetDataLayer( cs, DevExpress.Xpo.DB.AutoCreateOption.DatabaseAndSchema );
-         DevExpress.Xpo.XpoDefault.DataLayer = dl;
+         string tfn = Global.TempPathName + System.IO.Path.GetFileName( System.IO.Path.GetTempFileName( ) );
+         try
+         {
+            string cs = DevExpress.Xpo.DB.SQLiteConnectionProvider.GetConnectionString( tfn );
+            DevExpress.Xpo.IDataLayer dl = DevExpress.Xpo.XpoDefault.GetDataLayer( cs, DevExpress.Xpo.DB.AutoCreateOption.DatabaseAndSchema );
+            DevExpress.Xpo.XpoDefault.DataLayer = dl;
+         }
+         catch( System.Exception ex )
+         {
+            
+         }
          //
          return tfn;
       }

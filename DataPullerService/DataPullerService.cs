@@ -13,7 +13,7 @@
       public const string SERVICE_NAME_PREFIX = "DataPuller";
       public const string SERVICE_LOGGER_NAME = SERVICE_NAME_PREFIX + "Logger";
       public const string SERVICE_LOGGER_SOURCE_NAME = SERVICE_LOGGER_NAME + "Service";
-      public const int SERVICE_TIMER_INTERVAL = 20000;
+      public const int SERVICE_TIMER_INTERVAL = (60*60*1000);
 
       private System.Timers.Timer _timer = null;
 
@@ -48,7 +48,16 @@
          base.OnCustomCommand( command );
          if( command == (int) CustomCommand.LogIt )
          {
-            WriteToLog( SERVICE_NAME_PREFIX + CustomCommand.LogIt.ToString( ) + ":" );
+            WriteToLog( SERVICE_NAME_PREFIX + CustomCommand.LogIt.ToString( ) + ": [START] " );
+            try
+            {
+               Z900.DataPuller.Engine.Start( );
+            }
+            catch( System.Exception ex )
+            {
+               
+            }
+            WriteToLog( SERVICE_NAME_PREFIX + CustomCommand.LogIt.ToString( ) + ": [  END]" );
          }
       }
       protected override void OnStart( string[ ] args )
