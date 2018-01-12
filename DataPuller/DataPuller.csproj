@@ -93,6 +93,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Engine.cs" />
+    <Compile Include="Engine2.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

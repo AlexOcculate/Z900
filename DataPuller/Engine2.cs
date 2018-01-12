@@ -1,6 +1,6 @@
 ﻿namespace Z900.DataPuller
 {
-   public static class Engine
+   public static class Engine2
    {
       public static void Start()
       {
@@ -16,7 +16,7 @@
                }
                try
                {
-                  ActiveQueryBuilder.Core.SQLContext qb = PullMetadata( ds );
+                  ActiveQueryBuilder.View.WinForms.QueryBuilder qb = PullMetadata( ds );
                   if( qb == null )
                   {
                      continue;
@@ -40,20 +40,20 @@
       }
 
       #region --- AQB QB Handling... ---
-      private static ActiveQueryBuilder.Core.SQLContext PullMetadata( DataModel.DataStore ds )
+      private static ActiveQueryBuilder.View.WinForms.QueryBuilder PullMetadata( DataModel.DataStore ds )
       {
-         ActiveQueryBuilder.Core.SQLContext sc;
+         ActiveQueryBuilder.View.WinForms.QueryBuilder qb;
          switch( (DataModel.DataStore.SyntaxProviderEnum) ds.SyntaxProvider )
          {
             case DataModel.DataStore.SyntaxProviderEnum.SQLITE:
-               sc = CreateAqbQbSQLite( ds );
+               qb = CreateAqbQbSQLite( ds );
                break;
             case DataModel.DataStore.SyntaxProviderEnum.MS_SQL_SERVER_2014:
-               return sc = null; // CreateAqbQbMSSS( ds );
-                                 // break;
+               qb = CreateAqbQbMSSS( ds );
+               break;
             case DataModel.DataStore.SyntaxProviderEnum.AUTO:
-               return sc = null; // CreateAqbQbAuto( ds );
-                                 // break;
+               return qb = null; // CreateAqbQbAuto( ds );
+                                 //break;
             case DataModel.DataStore.SyntaxProviderEnum.GENERIC:
             case DataModel.DataStore.SyntaxProviderEnum.ANSI_SQL_2003:
             case DataModel.DataStore.SyntaxProviderEnum.ANSI_SQL_89:
@@ -93,7 +93,7 @@
             default:
                return null;
          }
-         ActiveQueryBuilder.Core.MetadataLoadingOptions loadingOptions = sc.MetadataContainer.LoadingOptions;
+         ActiveQueryBuilder.Core.MetadataLoadingOptions loadingOptions = qb.SQLContext.MetadataContainer.LoadingOptions;
          loadingOptions.LoadDefaultDatabaseOnly = ds.LoadDefaultDatabaseOnly;
          loadingOptions.LoadSystemObjects = ds.LoadSystemObjects;
          //loadingOptions.IncludeFilter.Types = MetadataType.Field;
@@ -105,9 +105,9 @@
             ds.AqbQbFilename = Global.DataStoreCollectionPathName + x + "." + ds.Name + Global.FileExtensionXmlAqbQb;
             ds.MiFqnFilename = Global.DataStoreCollectionPathName + x + "." + ds.Name + Global.FileExtensionXmlMiFqn;
          }
-         sc.MetadataContainer.LoadAll( ds.WithFields );
+         qb.MetadataContainer.LoadAll( ds.WithFields );
          //qb.InitializeDatabaseSchemaTree( );
-         return sc;
+         return qb;
 
       }
 
@@ -126,49 +126,58 @@
       #endregion
 
       #region --- SQLite Handle and AQB-QB ---
-      /*
-         https://support.activequerybuilder.com/hc/en-us/articles/115001055349-Getting-started-with-AQB-NET-3-in-the-Separated-Controls-UI-or-Non-visual-mode
-
-         Your initialization code will look as follows:
-
-         // Non-visual objects
-         _sqlContext = new SQLContext
-         {
-             SyntaxProvider = new MSSQLSyntaxProvider 
-             {
-                ServerVersion = MSSQLServerVersion.MSSQL2012
-             },
-             MetadataProvider = new OLEDBMetadataProvider 
-             {
-                   Connection = new OleDbConnection() 
-                   {
-                      ConnectionString = ""
-                   }
-             }
-         };
-
-         _sqlQuery = new SQLQuery(_sqlContext);
-
-         Sergey Smagin
-         Ok, then you need only the SQLContext object.
-
-         sqlContext.MetadataContainer.ExportToXML();
-
-      */
-      private static ActiveQueryBuilder.Core.SQLContext CreateAqbQbSQLite( DataModel.DataStore ds )
+      private static ActiveQueryBuilder.View.WinForms.QueryBuilder CreateAqbQbSQLite( DataModel.DataStore ds )
       {
-         ActiveQueryBuilder.Core.SQLContext sc = new ActiveQueryBuilder.Core.SQLContext( )
+
+         /*
+            https://support.activequerybuilder.com/hc/en-us/articles/115001055349-Getting-started-with-AQB-NET-3-in-the-Separated-Controls-UI-or-Non-visual-mode
+
+            Your initialization code will look as follows:
+
+            // Non-visual objects
+            _sqlContext = new SQLContext
+            {
+                SyntaxProvider = new MSSQLSyntaxProvider 
+                {
+                   ServerVersion = MSSQLServerVersion.MSSQL2012
+                },
+                MetadataProvider = new OLEDBMetadataProvider 
+                {
+                      Connection = new OleDbConnection() 
+                      {
+                         ConnectionString = ""
+                      }
+                }
+            };
+
+            _sqlQuery = new SQLQuery(_sqlContext);
+
+            Sergey Smagin
+            Ok, then you need only the SQLContext object.
+
+            sqlContext.MetadataContainer.ExportToXML();
+
+         */
+         //ActiveQueryBuilder.Core.SQLContext sc = new ActiveQueryBuilder.Core.SQLContext( )
+         //{
+         //   SyntaxProvider = new ActiveQueryBuilder.Core.SQLiteSyntaxProvider( ),
+         //   MetadataProvider = new ActiveQueryBuilder.Core.SQLiteMetadataProvider( )
+         //   {
+         //      Connection = new System.Data.SQLite.SQLiteConnection( )
+         //      {
+         //         ConnectionString = ds.ConnectionString
+         //      }
+         //   }
+         //};
+         //
+         ActiveQueryBuilder.View.WinForms.QueryBuilder qb = new ActiveQueryBuilder.View.WinForms.QueryBuilder( )
          {
             SyntaxProvider = new ActiveQueryBuilder.Core.SQLiteSyntaxProvider( ),
             MetadataProvider = new ActiveQueryBuilder.Core.SQLiteMetadataProvider( )
-            {
-               Connection = new System.Data.SQLite.SQLiteConnection( )
-               {
-                  ConnectionString = ds.ConnectionString
-               }
-            }
          };
-         return sc;
+         //qb.MetadataProvider.Connection = new System.Data.SqlClient.SqlConnection( ds.ConnectionString );
+         qb.MetadataProvider.Connection = new System.Data.SQLite.SQLiteConnection( ds.ConnectionString );
+         return qb;
       }
       #endregion
 
@@ -186,13 +195,13 @@
       }
       #endregion
 
-      private static void DumpAqbQb( ActiveQueryBuilder.Core.SQLContext sc, DataModel.DataStore ds )
+      private static void DumpAqbQb( ActiveQueryBuilder.View.WinForms.QueryBuilder qb, DataModel.DataStore ds )
       {
          string path = Global.DataStoreCollectionPathName + Global.TS_STR;
          {
             // Export AQB’s Query Builder XML Structures…
-            string xmlStr = sc.MetadataContainer.XML;
-            sc.MetadataContainer.ExportToXML( ds.TempFileFullPathName );
+            string xmlStr = qb.MetadataContainer.XML;
+            qb.MetadataContainer.ExportToXML( ds.TempFileFullPathName );
             // SQLite From TMP to "USER PATH"
             System.IO.File.Copy( ds.TempFileFullPathName, ds.AqbQbFilename, true );
             // qb.MetadataContainer.ImportFromXML( filename );
@@ -202,10 +211,10 @@
       #endregion
 
       #region --- EXTRACT METADATA VALUES ---
-      private static DataModel.MetadataItemCollection DumpMetadataItem( DataModel.DataStore ds, ActiveQueryBuilder.Core.SQLContext sc )
+      private static DataModel.MetadataItemCollection DumpMetadataItem( DataModel.DataStore ds, ActiveQueryBuilder.View.WinForms.QueryBuilder qb )
       {
          DataModel.MetadataItemCollection o = new DataModel.MetadataItemCollection( );
-         o.List = BuildBindingList( sc );
+         o.List = BuildBindingList( qb );
          // Export MetadataItem FQN Collection...
          string TempFileFullPathName = System.IO.Path.GetTempFileName( );
          o.Save( TempFileFullPathName );
@@ -223,13 +232,13 @@
          public int grandParentID;
       }
       private static System.ComponentModel.BindingList<DataModel.MetadataItem> BuildBindingList(
-         ActiveQueryBuilder.Core.SQLContext sc
+         ActiveQueryBuilder.View.WinForms.QueryBuilder qb
          )
       {
          System.ComponentModel.BindingList<DataModel.MetadataItem> list = new System.ComponentModel.BindingList<DataModel.MetadataItem>( );
          using( var sqlContext = new ActiveQueryBuilder.Core.SQLContext( ) )
          {
-            sqlContext.Assign( sc );
+            sqlContext.Assign( qb.SQLContext );
             //sqlContext.MetadataContainer.LoadingOptions.LoadDefaultDatabaseOnly = false;
             //sqlContext.MetadataContainer.LoadingOptions.LoadSystemObjects = false;
 

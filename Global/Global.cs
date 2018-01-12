@@ -26,7 +26,7 @@
       private const string TEMP_PATH_DIR_CONFIG_KEY_NAME = "TEMP_PATHDIR"; 
       public static string TempPathName
       {
-         [System.Diagnostics.DebuggerStepThrough]
+         //[System.Diagnostics.DebuggerStepThrough]
          get
          {
             try
@@ -44,7 +44,7 @@
       private const string DATASTORECOLL_PATH_DIR_CONFIG_KEY_NAME = "DSCOLL_PATHDIR";
       public static string DataStoreCollectionPathName
       {
-         [System.Diagnostics.DebuggerStepThrough]
+         //[System.Diagnostics.DebuggerStepThrough]
          get
          {
             try

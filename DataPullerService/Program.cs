@@ -1,7 +1,4 @@
-﻿//using System.ServiceProcess;
-//using System.Windows.Forms;
-
-namespace Z900.DataPuller
+﻿namespace Z900.DataPuller
 
 {
    static class Program
@@ -9,11 +6,11 @@ namespace Z900.DataPuller
       /// <summary>
       /// The main entry point for the application.
       /// </summary>
-      [System.STAThread] // @#$%
+      //[System.STAThread] // @#$%
       static void Main()
       {
-         System.Windows.Forms.Application.EnableVisualStyles( );
-         System.Windows.Forms.Application.SetCompatibleTextRenderingDefault( false );
+         //System.Windows.Forms.Application.EnableVisualStyles( );
+         //System.Windows.Forms.Application.SetCompatibleTextRenderingDefault( false );
          //Application.Run( new DataPullerManagerForm( ) );
          //
          System.ServiceProcess.ServiceBase[ ] ServicesToRun;

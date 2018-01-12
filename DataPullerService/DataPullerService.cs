@@ -30,7 +30,8 @@
          this._timer.Elapsed += new System.Timers.ElapsedEventHandler( this._timer_Elapsed );
       }
 
-      private void WriteToLog( string msg )
+      #region --- Write To Log Methdos ---
+      private void WriteToLog( string msg, System.Diagnostics.EventLogEntryType type = System.Diagnostics.EventLogEntryType.Information )
       {
          System.Diagnostics.EventLog evt = new System.Diagnostics.EventLog( SERVICE_LOGGER_NAME );
          string message = msg
@@ -40,9 +41,31 @@
             + System.DateTime.Now.ToLongTimeString( )
             ;
          evt.Source = SERVICE_LOGGER_SOURCE_NAME;
-         evt.WriteEntry( message, System.Diagnostics.EventLogEntryType.Information );
+         evt.WriteEntry( message, type );
       }
+      private void li( string msg )
+      {
+         WriteToLog( msg, System.Diagnostics.EventLogEntryType.Information );
+      }
+      private void le( string msg )
+      {
+         WriteToLog( msg, System.Diagnostics.EventLogEntryType.Error );
+      }
+      private void laf( string msg )
+      {
+         WriteToLog( msg, System.Diagnostics.EventLogEntryType.FailureAudit );
+      }
+      private void las( string msg )
+      {
+         WriteToLog( msg, System.Diagnostics.EventLogEntryType.SuccessAudit );
+      }
+      private void lw( string msg )
+      {
+         WriteToLog( msg, System.Diagnostics.EventLogEntryType.Warning );
+      }
+      #endregion
 
+      #region --- Service Events ---
       protected override void OnCustomCommand( int command )
       {
          base.OnCustomCommand( command );
@@ -55,11 +78,12 @@
             }
             catch( System.Exception ex )
             {
-               
+
             }
             WriteToLog( SERVICE_NAME_PREFIX + CustomCommand.LogIt.ToString( ) + ": [  END]" );
          }
       }
+
       protected override void OnStart( string[ ] args )
       {
          this._timer.Start( );
@@ -89,6 +113,7 @@
          base.OnShutdown( );
          this._timer.Stop( );
       }
+      #endregion
 
       // This method is called when the timer fires
       // it’s elapsed event. It will write the time
