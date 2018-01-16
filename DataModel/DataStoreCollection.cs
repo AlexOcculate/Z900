@@ -353,57 +353,29 @@
          this.SQLiteFileFullPathName = sqliteFn;
          this.XmlFileFullPathName = xmlFn;
          this.FinishTS = System.DateTime.Now;
-         SaveDataStoreCollection( this );
-         // SQLite From TMP to "USER PATH"
-         System.IO.File.Copy( this.TempFileFullPathName, this.SQLiteFileFullPathName, true );
+         //SaveDataStoreCollection( this );
+         //// SQLite From TMP to "USER PATH"
+         //System.IO.File.Copy( this.TempFileFullPathName, this.SQLiteFileFullPathName, true );
          // Save XML at "USER PATH"
          this.SaveXML( this.XmlFileFullPathName );
       }
       private static void SaveDataStoreCollection( DataStoreCollection dsColl )
       {
          // The session creation must be before the object creation!!!
-         DevExpress.Xpo.Session session = DevExpress.Xpo.XpoDefault.Session; // DevExpress.Xpo.Session.DefaultSession;
-         session.Save( dsColl );
-         foreach( DataStore ds in dsColl.List )
-         {
-            session.Save( ds );
-         }
+         //DevExpress.Xpo.Session session = DevExpress.Xpo.XpoDefault.Session; // DevExpress.Xpo.Session.DefaultSession;
+         //session.Save( dsColl );
+         //foreach( DataStore ds in dsColl.List )
+         //{
+         //   session.Save( ds );
+         //}
       }
 
       public static DataStoreCollection LoadDataStoreCollection()
       {
-         DataStoreCollection dsColl = DataStoreCollection.LoadLastWrittenSQLiteDataStoreCollection( );
+         DataStoreCollection dsColl = dsColl = DataStoreCollection.LoadLastWrittenXmlDataStoreCollection( );
          if( dsColl == null )
          {
-            dsColl = DataStoreCollection.LoadLastWrittenXmlDataStoreCollection( );
-            if( dsColl == null )
-            {
-               dsColl = DataStoreCollection.CreateBootstrapDataStoreCollection( );
-            }
-         }
-         return dsColl;
-      }
-
-      private static DataStoreCollection LoadLastWrittenSQLiteDataStoreCollection()
-      {
-         System.IO.FileInfo fi = Global.GetLastWrittenSQLiteFileInfo( );
-         if( fi == null )
-         {
-            return null;
-         }
-         // The session creation must be before the object creation!!!
-         string tffpn = CreateSession2TmpFs( );
-         System.IO.File.Copy( fi.FullName, tffpn, true );
-         DevExpress.Xpo.Session session = DevExpress.Xpo.Session.DefaultSession;
-         DataStoreCollection dsColl = session.GetObjectByKey<DataStoreCollection>( 1 );
-         dsColl.TempFileFullPathName = tffpn;
-         dsColl.OrigFileFullPathName = fi.FullName;
-         session.Save( dsColl );
-         DevExpress.Data.Filtering.CriteriaOperator op = new DevExpress.Data.Filtering.BinaryOperator( DataStore.CID_FIELDNAME, dsColl.ID );
-         DevExpress.Xpo.XPCollection<DataStore> coll = new DevExpress.Xpo.XPCollection<DataStore>( session, op );
-         foreach( DataStore ds in coll )
-         {
-            dsColl.List.Add( ds );
+            dsColl = DataStoreCollection.CreateBootstrapDataStoreCollection( );
          }
          return dsColl;
       }
@@ -421,7 +393,7 @@
          dsColl.ID = 0;
          dsColl.OrigFileFullPathName = fi.FullName;
          dsColl.TempFileFullPathName = tffpn;
-         SaveDataStoreCollection( dsColl );
+         //SaveDataStoreCollection( dsColl );
          //
          return dsColl;
       }
@@ -486,16 +458,19 @@
          // The session creation must be before the object creation!!!
          // create "original file" @ "TMP FS"...
          string tfn = Global.TempPathName + System.IO.Path.GetFileName( System.IO.Path.GetTempFileName( ) );
-         try
-         {
-            string cs = DevExpress.Xpo.DB.SQLiteConnectionProvider.GetConnectionString( tfn );
-            DevExpress.Xpo.IDataLayer dl = DevExpress.Xpo.XpoDefault.GetDataLayer( cs, DevExpress.Xpo.DB.AutoCreateOption.DatabaseAndSchema );
-            DevExpress.Xpo.XpoDefault.DataLayer = dl;
-         }
-         catch( System.Exception ex )
-         {
-            
-         }
+         //string tfn = System.AppDomain.CurrentDomain.BaseDirectory + System.IO.Path.GetFileName( System.IO.Path.GetTempFileName( ) );
+         //string x = "Data Source=" + tfn + ";";
+         //try
+         //{
+         //   string cs = DevExpress.Xpo.DB.SQLiteConnectionProvider.GetConnectionString( tfn );
+         //   DevExpress.Xpo.IDataLayer dl = DevExpress.Xpo.XpoDefault.GetDataLayer( cs, DevExpress.Xpo.DB.AutoCreateOption.DatabaseAndSchema );
+         //   DevExpress.Xpo.XpoDefault.DataLayer = dl;
+         //}
+         //catch( System.Exception ex )
+         //{
+         //   var str = ex.ToString( );
+         //   int i = 1 + 1;
+         //}
          //
          return tfn;
       }

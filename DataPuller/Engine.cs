@@ -7,6 +7,7 @@
          DataModel.DataStoreCollection dsColl = DataModel.DataStoreCollection.LoadDataStoreCollection( );
          if( dsColl.IsActive )
          {
+            int activeCounter = 0;
             for( int i = 0; i < dsColl.List.Count; i++ )
             {
                DataModel.DataStore ds = dsColl.List[ i ];
@@ -14,29 +15,60 @@
                {
                   continue;
                }
-               try
+               activeCounter++;
+            }
+            li( " DataStores to pull: " + activeCounter );
+            if( activeCounter > 0 )
+            {
+               System.Threading.Thread.CurrentThread.Name = "Main";
+               System.Threading.Tasks.Task[ ] tasks = new System.Threading.Tasks.Task[ activeCounter ];
+               int counter = 0;
+               for( int i = 0; i < dsColl.List.Count; i++ )
                {
-                  ActiveQueryBuilder.Core.SQLContext qb = PullMetadata( ds );
-                  if( qb == null )
+                  DataModel.DataStore ds = dsColl.List[ i ];
+                  if( !ds.IsActive /*|| !ds.IsToPullRemotely*/ )
                   {
                      continue;
                   }
-                  DumpAqbQb( qb, ds );
-                  DataModel.MetadataItemCollection miColl = DumpMetadataItem( ds, qb );
-                  // publish( qb, ds );
-                  // push( qb, ds );
-                  // baseline( qb, ds );
-                  // diff( qb, ds );
-                  // thesaurus( qb, ds );
-                  // watchers( qb, ds );
-                  // log( qb, ds );
+                  tasks[ counter++ ] = System.Threading.Tasks.Task.Factory.StartNew( () => PullAndDump( ds ), System.Threading.Tasks.TaskCreationOptions.LongRunning );
                }
-               catch( System.Exception ex )
+
+               li( " Waiting..." );
+               while( !System.Threading.Tasks.Task.WaitAll( tasks, 60 * 1000 ) )
                {
+                  foreach( var t in tasks )
+                  {
+                     System.Console.WriteLine( "   Task #{0}: {1}", t.Id, t.Status );
+                  }
+                  li( " Waiting..." );
                }
             }
          }
          dsColl.SaveDataStoreCollection( );
+      }
+
+      private static void PullAndDump( DataModel.DataStore ds )
+      {
+         try
+         {
+            ActiveQueryBuilder.Core.SQLContext qb = PullMetadata( ds );
+            if( qb == null )
+            {
+               return;
+            }
+            DumpAqbQb( qb, ds );
+            DataModel.MetadataItemCollection miColl = DumpMetadataItem( ds, qb );
+            // publish( qb, ds );
+            // push( qb, ds );
+            // baseline( qb, ds );
+            // diff( qb, ds );
+            // thesaurus( qb, ds );
+            // watchers( qb, ds );
+            // log( qb, ds );
+         }
+         catch( System.Exception ex )
+         {
+         }
       }
 
       #region --- AQB QB Handling... ---
@@ -505,6 +537,44 @@
          }
          list.Add( o );
          return o;
+      }
+      #endregion
+
+      #region --- Write To Log Methdos ---
+      public const string SERVICE_NAME_PREFIX = "DataPuller";
+      public const string SERVICE_LOGGER_NAME = SERVICE_NAME_PREFIX + "Logger";
+      public const string SERVICE_LOGGER_SOURCE_NAME = SERVICE_LOGGER_NAME + "Service";
+      private static void WriteToLog( string msg, System.Diagnostics.EventLogEntryType type = System.Diagnostics.EventLogEntryType.Information )
+      {
+         System.Diagnostics.EventLog evt = new System.Diagnostics.EventLog( SERVICE_LOGGER_NAME );
+         string message = msg
+            + ": "
+            + System.DateTime.Now.ToShortDateString( )
+            + " "
+            + System.DateTime.Now.ToLongTimeString( )
+            ;
+         evt.Source = SERVICE_LOGGER_SOURCE_NAME;
+         evt.WriteEntry( message, type );
+      }
+      private static void li( string msg )
+      {
+         WriteToLog( msg, System.Diagnostics.EventLogEntryType.Information );
+      }
+      private static void le( string msg )
+      {
+         WriteToLog( msg, System.Diagnostics.EventLogEntryType.Error );
+      }
+      private static void laf( string msg )
+      {
+         WriteToLog( msg, System.Diagnostics.EventLogEntryType.FailureAudit );
+      }
+      private static void las( string msg )
+      {
+         WriteToLog( msg, System.Diagnostics.EventLogEntryType.SuccessAudit );
+      }
+      private static void lw( string msg )
+      {
+         WriteToLog( msg, System.Diagnostics.EventLogEntryType.Warning );
       }
       #endregion
    }

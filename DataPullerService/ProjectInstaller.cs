@@ -9,5 +9,10 @@ namespace Z900.DataPullerService
       {
          InitializeComponent( );
       }
+
+      private void DataPullerServiceInstaller_AfterInstall( object sender, System.Configuration.Install.InstallEventArgs e )
+      {
+         //new System.ServiceProcess.ServiceController( this.DataPullerServiceInstaller.ServiceName ).Start();
+      }
    }
 }

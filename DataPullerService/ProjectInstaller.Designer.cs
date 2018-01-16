@@ -42,6 +42,8 @@
          this.DataPullerServiceInstaller.Description = "The Z900\'s Data Puller Service";
          this.DataPullerServiceInstaller.DisplayName = "DataPuller";
          this.DataPullerServiceInstaller.ServiceName = "DataPullerServiceInstaller";
+         this.DataPullerServiceInstaller.StartType = System.ServiceProcess.ServiceStartMode.Automatic;
+         this.DataPullerServiceInstaller.AfterInstall += new System.Configuration.Install.InstallEventHandler(this.DataPullerServiceInstaller_AfterInstall);
          // 
          // ProjectInstaller
          // 

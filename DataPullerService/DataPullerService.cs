@@ -1,4 +1,6 @@
-﻿namespace Z900.DataPuller
+﻿using System;
+
+namespace Z900.DataPuller
 {
    // Must be int between 128 and 255
    // Numbers 0-127 are reserved for windows, and are handled in the base class.
@@ -13,7 +15,7 @@
       public const string SERVICE_NAME_PREFIX = "DataPuller";
       public const string SERVICE_LOGGER_NAME = SERVICE_NAME_PREFIX + "Logger";
       public const string SERVICE_LOGGER_SOURCE_NAME = SERVICE_LOGGER_NAME + "Service";
-      public const int SERVICE_TIMER_INTERVAL = (60*60*1000);
+      public const int SERVICE_TIMER_INTERVAL = (60 * 60 * 1000);
 
       private System.Timers.Timer _timer = null;
 
@@ -66,50 +68,85 @@
       #endregion
 
       #region --- Service Events ---
+      public void OnDebug()
+      {
+         li( SERVICE_NAME_PREFIX + " OnDebug" );
+         string x = System.Environment.CurrentDirectory;
+         string f = System.AppDomain.CurrentDomain.BaseDirectory + Global.TS_STR + ".OnDebug.txt";
+         System.IO.File.Create( f );
+         //
+         OnStart( null );
+      }
+
       protected override void OnCustomCommand( int command )
       {
+         li( SERVICE_NAME_PREFIX + " OnCustomCommand" );
+         string f = System.AppDomain.CurrentDomain.BaseDirectory + Global.TS_STR + ".OnCustomCommand.txt";
+         System.IO.File.Create( f );
          base.OnCustomCommand( command );
          if( command == (int) CustomCommand.LogIt )
          {
-            WriteToLog( SERVICE_NAME_PREFIX + CustomCommand.LogIt.ToString( ) + ": [START] " );
+            li( SERVICE_NAME_PREFIX + CustomCommand.LogIt.ToString( ) + ": [START] " );
             try
             {
                Z900.DataPuller.Engine.Start( );
             }
             catch( System.Exception ex )
             {
-
+               le( SERVICE_NAME_PREFIX + CustomCommand.LogIt.ToString( ) + ": [EXCPT]" );
+               string ef = System.AppDomain.CurrentDomain.BaseDirectory + Global.TS_STR + ".OnException.txt";
+               using( var fs = System.IO.File.Create( ef, 1024, System.IO.FileOptions.WriteThrough ) )
+               {
+                  using( System.IO.StreamWriter sw = new System.IO.StreamWriter( fs, System.Text.Encoding.UTF8, 512, false ) )
+                  {
+                     sw.AutoFlush = true;
+                     sw.WriteLine( ex.ToString( ) );
+                  }
+               }
             }
-            WriteToLog( SERVICE_NAME_PREFIX + CustomCommand.LogIt.ToString( ) + ": [  END]" );
+            li( SERVICE_NAME_PREFIX + CustomCommand.LogIt.ToString( ) + ": [  END]" );
          }
       }
 
       protected override void OnStart( string[ ] args )
       {
+         li( SERVICE_NAME_PREFIX + " OnStart" );
+         string f = System.AppDomain.CurrentDomain.BaseDirectory + Global.TS_STR + ".OnStart.txt";
+         System.IO.File.Create( f );
          this._timer.Start( );
-         WriteToLog( SERVICE_NAME_PREFIX + " Start" );
       }
 
       protected override void OnStop()
       {
+         li( SERVICE_NAME_PREFIX + " OnStop" );
+         string f = System.AppDomain.CurrentDomain.BaseDirectory + Global.TS_STR + ".OnStop.txt";
+         System.IO.File.Create( f );
          this._timer.Stop( );
-         WriteToLog( SERVICE_NAME_PREFIX + " Stop" );
       }
 
       protected override void OnContinue()
       {
+         li( SERVICE_NAME_PREFIX + " OnContinue" );
+         string f = System.AppDomain.CurrentDomain.BaseDirectory + Global.TS_STR + ".OnContinue.txt";
+         System.IO.File.Create( f );
          base.OnContinue( );
          this._timer.Start( );
       }
 
       protected override void OnPause()
       {
+         li( SERVICE_NAME_PREFIX + " OnPause" );
+         string f = System.AppDomain.CurrentDomain.BaseDirectory + Global.TS_STR + ".OnPause.txt";
+         System.IO.File.Create( f );
          base.OnPause( );
          this._timer.Stop( );
       }
 
       protected override void OnShutdown()
       {
+         li( SERVICE_NAME_PREFIX + " OnShutdown" );
+         string f = System.AppDomain.CurrentDomain.BaseDirectory + Global.TS_STR + ".OnShutdown.txt";
+         System.IO.File.Create( f );
          base.OnShutdown( );
          this._timer.Stop( );
       }
@@ -120,7 +157,7 @@
       // to the event log.
       protected void _timer_Elapsed( object sender, System.Timers.ElapsedEventArgs e )
       {
-         WriteToLog( SERVICE_NAME_PREFIX + " Timer" );
+         li( SERVICE_NAME_PREFIX + " Timer" );
       }
    }
 }

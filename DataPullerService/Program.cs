@@ -18,7 +18,12 @@
          {
                 new DataPullerService()
          };
+#if DEBUG
+         ((DataPullerService) ServicesToRun[ 0 ]).OnDebug( );
+         System.Threading.Thread.Sleep( System.Threading.Timeout.Infinite );
+#else
          System.ServiceProcess.ServiceBase.Run( ServicesToRun );
+#endif
       }
    }
 }
